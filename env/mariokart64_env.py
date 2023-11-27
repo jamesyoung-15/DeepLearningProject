@@ -10,7 +10,8 @@ from gymnasium import spaces
 
 # stable baseline3
 from stable_baselines3.common.env_checker import check_env
-
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3 import DQN
 
 # ocr
 import pytesseract
@@ -27,8 +28,8 @@ class MarioKart64Env(gym.Env):
     def __init__(self):
         super().__init__()
         self.observation_space = spaces.Box(low=0,high=255, shape=(480,640,3),dtype=np.uint8)
-        # actions: forward, left, right
-        self.action_space = spaces.Discrete(2)
+        # actions: forward, left, right, reverse,
+        self.action_space = spaces.Discrete(4)
         # area to extract
         self.capture = mss.mss()
         # for my 2k monitor, might want to find a way to have consistent screen
@@ -49,12 +50,18 @@ class MarioKart64Env(gym.Env):
             3: "Reverse"
             
         }
-        duration = 0.5
-        if action!=3:
+        duration = 0.3
+        if action==0 or action==1:
             # Simulate Shift key press
+            subprocess.call(["xdotool", "keydown", "Shift"])
             subprocess.call(["xdotool", "keydown", action_map[action]])
             time.sleep(duration)
             # release
+            subprocess.call(["xdotool", "keyup", action_map[action]])
+            subprocess.call(["xdotool", "keyup", "Shift"])
+        elif action_map == 2:
+            subprocess.call(["xdotool", "keydown", action_map[action]])
+            time.sleep(duration+0.3)
             subprocess.call(["xdotool", "keyup", action_map[action]])
         # reverse
         else:
@@ -188,13 +195,39 @@ class MarioKart64Env(gym.Env):
 env = MarioKart64Env()
 
 
-
 # for episode in range(10):
 #     obs = env.reset()
 #     subprocess.call(["xdotool", "keydown", "Shift"])
 #     done = False
 #     totalReward = 0
 #     while not done:
-#         obs, reward, done, info = env.step(env.actionSpace.sample())
+#         obs, reward, done, truncated, info = env.step(env.action_space.sample())
 #         totalReward += reward
 #     print(f'Total reward for episode {episode} is {totalReward}')
+
+class TrainLoggingCallback(BaseCallback):
+    def __init__(self, checkFreq, savePath, verbose=1):
+        super(TrainLoggingCallback, self).__init__(verbose)
+        self.checkFreq = checkFreq
+        self.savePath = savePath
+    
+    def __init__callback(self):
+        if self.savePath is not None:
+            os.makedirs(self.savePath, exist_ok=True)
+        
+    def _on_step(self):
+        if self.n_calls % self.checkFreq == 0:
+            modelPath = os.path.join(self.savePath, 'best_model_{}'.format(self.n_calls))
+            self.model.save(modelPath)
+        return True
+
+CHECKPOINT_DIR = './train/'
+LOG_DIR = './logs/'
+
+callback = TrainLoggingCallback(checkFreq=1000, savePath=CHECKPOINT_DIR)
+
+# create dqn model
+model = DQN('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, buffer_size=10000, learning_starts=1000)
+
+# train
+model.learn(total_timesteps=5000, callback=callback)

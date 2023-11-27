@@ -6,7 +6,7 @@ import time
 
 with mss.mss() as sct:
     # Part of the screen to capture
-    monitor = {"top": 720, "left": 960, "width": 640, "height": 480}
+    monitor = {"top": 760, "left": 1150, "width": 25, "height": 50}
 
     while "Screen capturing":
         last_time = time.time()

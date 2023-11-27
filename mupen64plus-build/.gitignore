@@ -1,0 +1,4 @@
+# ignore source and test folders generated from get script
+source
+test
+mupen64plus-plugins

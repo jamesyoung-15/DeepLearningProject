@@ -1,29 +1,14 @@
 # DeepRL MarioKart64
-Ongoing course project that tries to use deep reinforced learning to play MarioKart64.
+My project that uses Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
 
 ## Setup
-Recommend use Python virtual environment. Install requirements from `requirements.txt` with Pip. Project setup for Linux (Arch btw).
+Recommend use Python virtual environment. Install requirements from `requirements.txt` with Pip. Project setup for Linux (Arch btw). See [this page](./setup.md) for full instructions to setup.
 
-### Creating and Activating Environment
-[Venv Documentation](https://docs.python.org/3/library/venv.html)
-
-Creating venv:
-``` bash
-python -m venv /path/to/new/virtual/environment
-```
-
-Activating venv:
-``` bash
-source <venv>/bin/activate
-```
-
-Installing requirements
-```bash
-pip install -r requirements.txt
-```
+## Gym Environment
+There is an existing Gym Environments for Mupen64Plus: [gym-mupen64plus](https://github.com/bzier/gym-mupen64plus) . However I decided create my own environment wrapper to read game memory.
 
 ## Emulator
-Using Mupen64Plus with Glide64mk plugin. On Arch installed [this](https://aur.archlinux.org/packages/mupen64plus-video-parallel-git) package from AUR. Either use parallel video plugin or Glide64mk instead of Rice video plugin as Rice video plugin stuttered on my system.
+For emulating N64 I used Mupen64Plus (M64P) with Glide64mk plugin. To enable debugging to access the memeory maps, build the M64P from source with debugging flag. I used Glide64mk instead of Rice video plugin as Rice video plugin stuttered on my system.
 
 ### Used Keyboard commands
 Default: [Documentation](https://mupen64plus.org/wiki/index.php/KeyboardSetup)
@@ -66,23 +51,17 @@ Default: [Documentation](https://mupen64plus.org/wiki/index.php/KeyboardSetup)
 |Select Rumblepack|"."|
 
 
-## Gym Environment
-There are existing Gym Environments for Mupen64Plus: [gym-mupen64plus](https://github.com/bzier/gym-mupen64plus) . However I decided create my own environment wrapper to read game memory.
 
-
-
-
-
-## Memory Map
+### Memory Map
 Todo: use memory to get player info for more info (eg. use current progress, speed, etc.).
 
 |Address|Info|
 |--- |--- |
-|0x1644D0: | Current progress |
-|0x0F6BBC: | Velocity |
-|0x0F69A4: | X Position |
-|0x0F69AC: | Y Position |
-|0xF69A8: | Z Position |
+|0x1644D0 | Current progress |
+|0x0F6BBC | Velocity |
+|0x0F69A4 | X Position |
+|0x0F69AC | Y Position |
+|0xF69A8 | Z Position |
 
 Resources: 
 - https://hack64.net/wiki/doku.php?id=mario_kart_64:memory_map
@@ -90,7 +69,7 @@ Resources:
 - https://tasvideos.org/GameResources/N64/MarioKart64
 - https://wulfebw.github.io/post/ssb64-rl-01/
 
-## Reading from Mupen64Plus memory
+### Reading from Mupen64Plus memory
 Use Mupen64Plus C++ API. To store into Python variable, will use Python ctype.
 
 ## Resources

@@ -1,19 +1,25 @@
 # DeepRL MarioKart64
 My project that uses Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
 
-## Setup
-Recommend use Python virtual environment. Install requirements from `requirements.txt` with Pip. Project setup for Linux (Arch btw). See [this page](./setup.md) for full instructions to setup.
+## Instructions
 
-## Gym Environment
-There is an existing Gym Environments for Mupen64Plus: [gym-mupen64plus](https://github.com/bzier/gym-mupen64plus) . However I decided create my own environment wrapper to read game memory.
+### Setup
+See [this page](./setup.md) for full instructions to setup.
 
-## Emulator
+### Usage
+
+## More About the Project
+
+### Gym Environment
+There is an existing Gym Environments for Mupen64Plus: [gym-mupen64plus](https://github.com/bzier/gym-mupen64plus). However I decided create my own environment wrapper to be able read game memory.
+
+### Emulator
 For emulating N64 I used Mupen64Plus (M64P) with Glide64mk plugin. To enable debugging to access the memeory maps, build the M64P from source with debugging flag. I used Glide64mk instead of Rice video plugin as Rice video plugin stuttered on my system.
 
-### Used Keyboard commands
+#### Used Keyboard commands
 Default: [Documentation](https://mupen64plus.org/wiki/index.php/KeyboardSetup)
 
-#### Mupen64Plus Menu Commands
+##### Mupen64Plus Menu Commands
 
 |Key|Description|
 |--- |--- |
@@ -52,7 +58,7 @@ Default: [Documentation](https://mupen64plus.org/wiki/index.php/KeyboardSetup)
 
 
 
-### Memory Map
+#### Memory Map
 Todo: use memory to get player info for more info (eg. use current progress, speed, etc.).
 
 |Address|Info|
@@ -69,10 +75,10 @@ Resources:
 - https://tasvideos.org/GameResources/N64/MarioKart64
 - https://wulfebw.github.io/post/ssb64-rl-01/
 
-### Reading from Mupen64Plus memory
+#### Reading from Mupen64Plus memory
 Use Mupen64Plus C++ API. To store into Python variable, will use Python ctype.
 
-## Resources
+### Resources
 https://www.grumpyoldnerd.com/post/reinforcement-learning-part-5-super-mario-kart
 http://cs231n.stanford.edu/reports/2017/pdfs/624.pdf
 https://cs229.stanford.edu/proj2012/LiaoYiYang-RLtoPlayMario.pdf

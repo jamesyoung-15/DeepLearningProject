@@ -4,6 +4,7 @@ import threading
 # my libraries
 import gym_mariokart64.mariokart64env as mk64gym
 import gym_mariokart64.m64py.m64 as m64
+import os
 
 def main():
     # # paths

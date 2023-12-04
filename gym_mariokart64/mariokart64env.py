@@ -13,6 +13,10 @@ from gymnasium import spaces
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3 import DQN
+from stable_baselines3.common.results_plotter import load_results, ts2xy
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.env_util import make_vec_env
 
 # ocr
 # import pytesseract
@@ -42,7 +46,7 @@ class MarioKart64Env(gym.Env):
         
         # area to extract
         self.capture = mss.mss()
-        # for my 2k monitor, might want to find a way to have consistent screen
+        # default to 2k, use set_game_screen function to change
         self.game_screen = {"top": 740, "left": 960, "width": 640, "height": 480}
 
         # ocr stuff
@@ -85,6 +89,20 @@ class MarioKart64Env(gym.Env):
         self.plugin_path = None
         self.core_path = None
 
+    def set_game_screen(self, useDefault=True, left=None, top=None):
+        """ Set the game screen to capture the emulator. Assumes emulator is running 640x480 at centre of screen. """
+        if useDefault:
+            return
+        if left and top:
+            self.game_screen = {"top": top, "left": left, "width": 640, "height": 480}
+        else:
+            screen_info = self.get_screen_res()
+            screen_width = int(screen_info['width'])
+            screen_height = int(screen_info['height'])
+            left = int(screen_width / 2) - 320
+            top = int(screen_height / 2) - 240 + 20
+            self.game_screen = {"top": top, "left": left, "width": 640, "height": 480}
+        print (self.game_screen)
 
     def set_paths(self, core_path, plugin_path, rom_path):
         """ Set core, plugin, and rom file paths. Can be relative (ie. ./directory/) or absolute (ie. /home/jamesyoung/m64p) """
@@ -122,7 +140,7 @@ class MarioKart64Env(gym.Env):
             subprocess.call(["xdotool", "keyup", "Shift"])
         else:
             subprocess.call(["xdotool", "keydown", action_map[action]])
-            time.sleep(duration+0.2)
+            time.sleep(duration+0.1)
             subprocess.call(["xdotool", "keyup", action_map[action]])
 
 
@@ -146,12 +164,12 @@ class MarioKart64Env(gym.Env):
             # reward for making new progress and going fast
             if new_progress>self.highest_progress and self.speed>self.speed_high_threshold:
                 factor = min(int(5*(progress_diff/self.good_progress_threshold)),20)
-                print("good: " + str(factor))
+                # print("good: " + str(factor))
                 reward+=factor
             # reward for making progress and moderate speed
             elif new_progress>self.highest_progress and self.speed>self.speed_threshold:
                 factor = min(int((progress_diff/self.good_progress_threshold)),5)
-                print("meh: " + str(factor))
+                # print("meh: " + str(factor))
                 reward += factor
             # punish for going wrong direction
             elif new_progress<self.progress:
@@ -159,15 +177,16 @@ class MarioKart64Env(gym.Env):
             # small reward kart for going fast
             if self.speed>self.speed_high_threshold:
                 reward+=1
+            # punish for going slow
             elif self.speed<self.speed_low_threshold:
-                reward-=5
+                reward-=1
         # reward kart for finishing
         else:
-            reward+=10000
+            reward+=100000
 
         # stop early if going backward too much
         if new_lap<self.current_lap:
-            reward-=200
+            reward-=500
             print("Stopped! Wrong way!")
             done = True
         
@@ -175,11 +194,11 @@ class MarioKart64Env(gym.Env):
         self.progress_queue.append(new_progress)
         self.speed_queue.append(self.speed)
         if sum(self.speed_queue)/len(self.speed_queue) < self.speed_low_threshold:
-            reward-=100
+            reward-=200
             print("Stopped! Too slow!")
             done = True
         if max(self.progress_queue) < self.highest_progress:
-            reward-=100
+            reward-=200
             print("Stopped! Not enough progress!")
             done = True
 
@@ -313,6 +332,50 @@ class TrainLoggingCallback(BaseCallback):
         if self.n_calls % self.check_freq == 0:
             model_path = os.path.join(self.save_path, 'best_model_{}'.format(self.n_calls))
             self.model.save(model_path)
+        return True
+
+class SaveOnBestTrainingRewardCallback(BaseCallback):
+    """
+    Callback for saving a model (the check is done every ``check_freq`` steps)
+    based on the training reward (in practice, we recommend using ``EvalCallback``).
+
+    :param check_freq: (int)
+    :param log_dir: (str) Path to the folder where the model will be saved.
+      It must contains the file created by the ``Monitor`` wrapper.
+    :param verbose: (int)
+    """
+    def __init__(self, check_freq: int, log_dir: str, verbose=1):
+        super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
+        self.check_freq = check_freq
+        self.log_dir = log_dir
+        self.save_path = os.path.join(log_dir, 'best_model')
+        self.best_mean_reward = -np.inf
+
+    def _init_callback(self) -> None:
+        # Create folder if needed
+        if self.save_path is not None:
+            os.makedirs(self.save_path, exist_ok=True)
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.check_freq == 0:
+
+          # Retrieve training reward
+          x, y = ts2xy(load_results(self.log_dir), 'timesteps')
+          if len(x) > 0:
+              # Mean training reward over the last 100 episodes
+              mean_reward = np.mean(y[-100:])
+              if self.verbose > 0:
+                print("Num timesteps: {}".format(self.num_timesteps))
+                print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(self.best_mean_reward, mean_reward))
+
+              # New best model, you could save the agent here
+              if mean_reward > self.best_mean_reward:
+                  self.best_mean_reward = mean_reward
+                  # Example for saving best model
+                  if self.verbose > 0:
+                    print("Saving new best model to {}".format(self.save_path))
+                  self.model.save(self.save_path)
+
         return True
 
 

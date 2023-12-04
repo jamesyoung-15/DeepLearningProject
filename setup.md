@@ -1,5 +1,5 @@
-# Project Setup Instructions
-This project was built and tested with Linux (Arch).
+# Detailed Project Setup Instructions
+This project was built and tested with Linux (tried on Arch and Debian).
 
 ### Creating and Activating Environment (Optional)
 [Python Virtual Environment Documentation](https://docs.python.org/3/library/venv.html)
@@ -25,6 +25,8 @@ cd DeepQLKart64
 pip install -r requirements.txt
 ```
 
+For Mupen64Plus, there are many requirements. See their documentation below. Also ensure you have `binutils-dev` as I ran into issue on PopOS where it said no file "dis-asm.h" without it.
+
 ## Building Mupen64Plus from Source (Linux)
 [Documentation on Compiling from Git.](https://mupen64plus.org/wiki/index.php/CompilingFromGit)
 ``` bash
@@ -34,7 +36,8 @@ chmod +x m64p_get.sh m64p_install.sh
 # install mupen64plus git repo
 ./m64p_get.sh
 # compile and build with debugging option
-./m64p_build.sh DEBUGGER=1
+./m64p_build.sh DEBUG=1 DEBUGGER=1
+# copy the core and plugin libraries over to m64py
+./copy_files.sh
 ```
-
-
+To check if the build was successful, you can run `./m64p_test.sh`.

@@ -188,7 +188,7 @@ class MarioKart64Env(gym.Env):
         # stop early if going backward too much
         if new_lap<self.current_lap:
             reward-=500
-            print("Stopped! Wrong way!")
+            # print("Stopped! Wrong way!")
             done = True
         
         # stop early if for the last few frames speed has been too slow
@@ -196,11 +196,11 @@ class MarioKart64Env(gym.Env):
         self.speed_queue.append(self.speed)
         if sum(self.speed_queue)/len(self.speed_queue) < self.speed_low_threshold:
             reward-=200
-            print("Stopped! Too slow!")
+            # print("Stopped! Too slow!")
             done = True
         if max(self.progress_queue) < self.highest_progress:
             reward-=200
-            print("Stopped! Not enough progress!")
+            # print("Stopped! Not enough progress!")
             done = True
 
         # update previous value to updated values

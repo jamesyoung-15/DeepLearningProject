@@ -218,11 +218,11 @@ class MarioKart64Env(gym.Env):
         return new_obs, reward, done, truncated, info
         
     # visualize game
-    def render(self):
-        """ Visualize game, not necessary """
-        cv2.imshow('Game', np.array(self.capture.grab(self.game_screen))[:,:,:3])
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.close()
+    # def render(self):
+    #     """ Visualize game, not necessary """
+    #     cv2.imshow('Game', np.array(self.capture.grab(self.game_screen))[:,:,:3])
+    #     if cv2.waitKey(1) & 0xFF == ord('q'):
+    #         self.close()
 
     # restart game
     def reset(self, seed=None):
@@ -284,12 +284,17 @@ class MarioKart64Env(gym.Env):
 
     # get screen and process frame
     def get_observation(self):
-        """ Grab screen with mss, return np image array """
+        """ Grab screen with mss, return resized np image array """
         # capture screen
         image_array = np.array(self.capture.grab(self.game_screen))[:,:,:3]
         # resize image
         im = resize(image_array, (66, 200, 3))
         image_array = im.reshape((66, 200, 3))
+        return image_array
+
+    def get_observation_full(self):
+        """ Same as above function without resizing. Used to check whether mss is capturing game screen correctly."""
+        image_array = np.array(self.capture.grab(self.game_screen))[:,:,:3]
         return image_array
 
     def get_lap(self):
@@ -316,10 +321,10 @@ class MarioKart64Env(gym.Env):
             return True
         return False
 
-    # close rendered screens
-    def close(self):
-        """ Close cv2 windows if needed """
-        cv2.destroyAllWindows()
+    # # close rendered screens
+    # def close(self):
+    #     """ Close cv2 windows if needed """
+    #     cv2.destroyAllWindows()
 
 
 class TrainLoggingCallback(BaseCallback):

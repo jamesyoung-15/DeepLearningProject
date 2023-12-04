@@ -23,7 +23,7 @@ def main(existing_model=None):
 
 
     env = mk64gym.MarioKart64Env()
-    env.set_game_screen(useDefault=False)
+    env.set_game_screen(useDefault=False,top=350,left=640)
     env.set_paths(lib_path, plugin_path, rom_path)
     # create thread for concurrency
     thread = threading.Thread(target=env.start_game)
@@ -34,7 +34,8 @@ def main(existing_model=None):
     
     # check observation
     # env.reset()
-    # image = env.get_observation()
+    # # image = env.get_observation()
+    # image = env.get_observation_full()
     # cv2.imshow('image', image)
     # cv2.waitKey()
     # time.sleep(5)
@@ -71,7 +72,7 @@ def main(existing_model=None):
                 buffer_size=100000, 
                 learning_starts=2000)
 
-    # train
+    # train model
     model.learn(total_timesteps=100000, callback=callback)
 
 if __name__ == '__main__':

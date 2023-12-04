@@ -3,6 +3,7 @@ import time
 import subprocess
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3 import DQN
 import os
 import cv2
@@ -18,7 +19,7 @@ def main(existing_model=None):
     plugin_path = "./gym_mariokart64/m64py/"
     rom_path = "./rom/mariokart64.n64"
     tensorboard_dir = 'logs/'
-    save_dir = 'tmp/'
+    log_dir = 'tmp/'
 
 
     env = mk64gym.MarioKart64Env()
@@ -31,13 +32,13 @@ def main(existing_model=None):
     time.sleep(9)
 
     
-    # obs = env.reset()
+    # check observation
     # image = env.get_observation()
     # cv2.imshow('image', image)
     # cv2.waitKey()
     # time.sleep(5)
 
-
+    # test env
     # for episode in range(2):
     #     obs = env.reset()
     #     subprocess.call(["xdotool", "keydown", "Shift"])
@@ -49,9 +50,11 @@ def main(existing_model=None):
     #         totalReward += reward
     #     print(f'Total reward for episode {episode} is {totalReward}')
 
-    os.makedirs(save_dir, exist_ok=True)
+    # make directories
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(tensorboard_dir, exist_ok=True)
     env = Monitor(env, log_dir)
-    callback = mk64gym.SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir=save_dir)
+    callback = mk64gym.SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir=log_dir)
 
     # create dqn model
     if existing_model:

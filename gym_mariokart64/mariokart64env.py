@@ -100,8 +100,9 @@ class MarioKart64Env(gym.Env):
             screen_width = int(screen_info['width'])
             screen_height = int(screen_info['height'])
             left = int(screen_width / 2) - 320
-            top = int(screen_height / 2) - 240 + 20
+            top = int(screen_height / 2) + 20
             self.game_screen = {"top": top, "left": left, "width": 640, "height": 480}
+        print("MSS Capturing screen at (top, left): ")
         print (self.game_screen)
 
     def set_paths(self, core_path, plugin_path, rom_path):
@@ -274,7 +275,10 @@ class MarioKart64Env(gym.Env):
     # get monitor resolution with xrandr (linux)    
     def get_screen_res(self):
         """ Use xrandr (Linux) to get the screen resolution, returns dictionary (eg. {'width': 1920, 'height': 1080}) """
-        output = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True, stdout=subprocess.PIPE).communicate()[0]
+        # output = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True, stdout=subprocess.PIPE).communicate()[0]
+        output = subprocess.check_output(
+            "xrandr | awk '/ connected primary/ {print $4}' | cut -d '+' -f1",
+            shell=True, executable="/bin/bash" )
         resolution = output.split()[0].split(b'x')
         return {'width': resolution[0].decode("utf-8"), 'height': resolution[1].decode("utf-8")}
 

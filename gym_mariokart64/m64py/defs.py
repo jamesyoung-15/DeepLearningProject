@@ -160,101 +160,101 @@ PLUGIN_DEFAULT = {
     M64PLUGIN_INPUT: "mupen64plus-input-sdl.so"
 }
 
-M64SAV_M64P = 1
-M64SAV_PJ64C = 2
-M64SAV_PJ64 = 3
+# M64SAV_M64P = 1
+# M64SAV_PJ64C = 2
+# M64SAV_PJ64 = 3
 
-M64P_SAVES = {
-    M64SAV_M64P: ("M64P (*.m64p)", "m64p"),
-    M64SAV_PJ64C: ("PJ64 compressed (*.zip)", "zip"),
-    M64SAV_PJ64: ("PJ64 (*.pj)", "pj")
-}
+# M64P_SAVES = {
+#     M64SAV_M64P: ("M64P (*.m64p)", "m64p"),
+#     M64SAV_PJ64C: ("PJ64 compressed (*.zip)", "zip"),
+#     M64SAV_PJ64: ("PJ64 (*.pj)", "pj")
+# }
 
-m64p_error = C.c_int
-m64p_GLattr = C.c_int
-
-
-class m64p_rom_header(C.Structure):
-    _fields_ = [
-        ('init_PI_BSB_DOM1_LAT_REG', C.c_ubyte),
-        ('init_PI_BSB_DOM1_PGS_REG', C.c_ubyte),
-        ('init_PI_BSB_DOM1_PWD_REG', C.c_ubyte),
-        ('init_PI_BSB_DOM1_PGS_REG2', C.c_ubyte),
-        ('ClockRate', C.c_uint),
-        ('PC', C.c_uint),
-        ('Release', C.c_uint),
-        ('CRC1', C.c_uint),
-        ('CRC2', C.c_uint),
-        ('Unknown', C.c_uint * 2),
-        ('Name', C.c_char * 20),
-        ('unknown', C.c_uint),
-        ('Manufacturer_ID', C.c_uint),
-        ('Cartridge_ID', C.c_ushort),
-        ('Country_code', C.c_ushort)
-    ]
+# m64p_error = C.c_int
+# m64p_GLattr = C.c_int
 
 
-class m64p_rom_settings(C.Structure):
-    _fields_ = [
-        ('goodname', C.c_char * 256),
-        ('MD5', C.c_char * 33),
-        ('savetype', C.c_ubyte),
-        ('status', C.c_ubyte),
-        ('players', C.c_ubyte),
-        ('rumble', C.c_ubyte),
-        ('transferpak', C.c_ubyte),
-        ('mempak', C.c_ubyte),
-        ('biopak', C.c_ubyte)
-    ]
+# class m64p_rom_header(C.Structure):
+#     _fields_ = [
+#         ('init_PI_BSB_DOM1_LAT_REG', C.c_ubyte),
+#         ('init_PI_BSB_DOM1_PGS_REG', C.c_ubyte),
+#         ('init_PI_BSB_DOM1_PWD_REG', C.c_ubyte),
+#         ('init_PI_BSB_DOM1_PGS_REG2', C.c_ubyte),
+#         ('ClockRate', C.c_uint),
+#         ('PC', C.c_uint),
+#         ('Release', C.c_uint),
+#         ('CRC1', C.c_uint),
+#         ('CRC2', C.c_uint),
+#         ('Unknown', C.c_uint * 2),
+#         ('Name', C.c_char * 20),
+#         ('unknown', C.c_uint),
+#         ('Manufacturer_ID', C.c_uint),
+#         ('Cartridge_ID', C.c_ushort),
+#         ('Country_code', C.c_ushort)
+#     ]
 
 
-class m64p_cheat_code(C.Structure):
-    _fields_ = [
-        ('address', C.c_uint),
-        ('value', C.c_int),
-    ]
+# class m64p_rom_settings(C.Structure):
+#     _fields_ = [
+#         ('goodname', C.c_char * 256),
+#         ('MD5', C.c_char * 33),
+#         ('savetype', C.c_ubyte),
+#         ('status', C.c_ubyte),
+#         ('players', C.c_ubyte),
+#         ('rumble', C.c_ubyte),
+#         ('transferpak', C.c_ubyte),
+#         ('mempak', C.c_ubyte),
+#         ('biopak', C.c_ubyte)
+#     ]
 
 
-class m64p_2d_size(C.Structure):
-    _fields_ = [
-        ('uiWidth', C.c_uint),
-        ('uiHeight', C.c_uint)
-    ]
-
-FuncInit = C.CFUNCTYPE(m64p_error)
-FuncQuit = C.CFUNCTYPE(m64p_error)
-FuncListModes = C.CFUNCTYPE(m64p_error, C.POINTER(m64p_2d_size), C.POINTER(C.c_int))
-FuncSetMode = C.CFUNCTYPE(m64p_error, C.c_int, C.c_int, C.c_int, C.c_int)
-FuncGLGetProc = C.CFUNCTYPE(C.c_void_p, C.c_char_p)
-FuncGLSetAttr = C.CFUNCTYPE(m64p_error, m64p_GLattr, C.c_int)
-FuncGLGetAttr = C.CFUNCTYPE(m64p_error, m64p_GLattr, C.POINTER(C.c_int))
-FuncGLSwapBuf = C.CFUNCTYPE(m64p_error)
-FuncSetCaption = C.CFUNCTYPE(m64p_error, C.c_char_p)
-FuncToggleFS = C.CFUNCTYPE(m64p_error)
-FuncResizeWindow = C.CFUNCTYPE(m64p_error, C.c_int, C.c_int)
-FuncGLGetDefaultFramebuffer = C.CFUNCTYPE(C.c_uint)
+# class m64p_cheat_code(C.Structure):
+#     _fields_ = [
+#         ('address', C.c_uint),
+#         ('value', C.c_int),
+#     ]
 
 
-class m64p_video_extension_functions(C.Structure):
-    _fields_ = [
-        ('Functions', C.c_uint),
-        ('VidExtFuncInit', FuncInit),
-        ('VidExtFuncQuit', FuncQuit),
-        ('VidExtFuncListModes', FuncListModes),
-        ('VidExtFuncSetMode', FuncSetMode),
-        ('VidExtFuncGLGetProc', FuncGLGetProc),
-        ('VidExtFuncGLSetAttr', FuncGLSetAttr),
-        ('VidExtFuncGLGetAttr', FuncGLGetAttr),
-        ('VidExtFuncGLSwapBuf', FuncGLSwapBuf),
-        ('VidExtFuncSetCaption', FuncSetCaption),
-        ('VidExtFuncToggleFS', FuncToggleFS),
-        ('VidExtFuncResizeWindow', FuncResizeWindow),
-        ('VidExtFuncGLGetDefaultFramebuffer', FuncGLGetDefaultFramebuffer)
-    ]
+# class m64p_2d_size(C.Structure):
+#     _fields_ = [
+#         ('uiWidth', C.c_uint),
+#         ('uiHeight', C.c_uint)
+#     ]
 
-LOGO = " __  __                         __   _  _   ____  _            \n"
-LOGO += "|  \/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \| |_   _ ___  \n"
-LOGO += "| |\/| | | | | '_ \ / _ \ '_ \| '_ \| || |_| |_) | | | | / __| \n"
-LOGO += "| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \__ \ \n"
-LOGO += "|_|  |_|\__,_| .__/ \___|_| |_|\___/   |_| |_|   |_|\__,_|___/ \n"
-LOGO += "             |_|                                               \n"
+# FuncInit = C.CFUNCTYPE(m64p_error)
+# FuncQuit = C.CFUNCTYPE(m64p_error)
+# FuncListModes = C.CFUNCTYPE(m64p_error, C.POINTER(m64p_2d_size), C.POINTER(C.c_int))
+# FuncSetMode = C.CFUNCTYPE(m64p_error, C.c_int, C.c_int, C.c_int, C.c_int)
+# FuncGLGetProc = C.CFUNCTYPE(C.c_void_p, C.c_char_p)
+# FuncGLSetAttr = C.CFUNCTYPE(m64p_error, m64p_GLattr, C.c_int)
+# FuncGLGetAttr = C.CFUNCTYPE(m64p_error, m64p_GLattr, C.POINTER(C.c_int))
+# FuncGLSwapBuf = C.CFUNCTYPE(m64p_error)
+# FuncSetCaption = C.CFUNCTYPE(m64p_error, C.c_char_p)
+# FuncToggleFS = C.CFUNCTYPE(m64p_error)
+# FuncResizeWindow = C.CFUNCTYPE(m64p_error, C.c_int, C.c_int)
+# FuncGLGetDefaultFramebuffer = C.CFUNCTYPE(C.c_uint)
+
+
+# class m64p_video_extension_functions(C.Structure):
+#     _fields_ = [
+#         ('Functions', C.c_uint),
+#         ('VidExtFuncInit', FuncInit),
+#         ('VidExtFuncQuit', FuncQuit),
+#         ('VidExtFuncListModes', FuncListModes),
+#         ('VidExtFuncSetMode', FuncSetMode),
+#         ('VidExtFuncGLGetProc', FuncGLGetProc),
+#         ('VidExtFuncGLSetAttr', FuncGLSetAttr),
+#         ('VidExtFuncGLGetAttr', FuncGLGetAttr),
+#         ('VidExtFuncGLSwapBuf', FuncGLSwapBuf),
+#         ('VidExtFuncSetCaption', FuncSetCaption),
+#         ('VidExtFuncToggleFS', FuncToggleFS),
+#         ('VidExtFuncResizeWindow', FuncResizeWindow),
+#         ('VidExtFuncGLGetDefaultFramebuffer', FuncGLGetDefaultFramebuffer)
+#     ]
+
+# LOGO = " __  __                         __   _  _   ____  _            \n"
+# LOGO += "|  \/  |_   _ _ __   ___ _ __  / /_ | || | |  _ \| |_   _ ___  \n"
+# LOGO += "| |\/| | | | | '_ \ / _ \ '_ \| '_ \| || |_| |_) | | | | / __| \n"
+# LOGO += "| |  | | |_| | |_) |  __/ | | | (_) |__   _|  __/| | |_| \__ \ \n"
+# LOGO += "|_|  |_|\__,_| .__/ \___|_| |_|\___/   |_| |_|   |_|\__,_|___/ \n"
+# LOGO += "             |_|                                               \n"

@@ -1,2 +1,4 @@
 # Hide rom
-rom/*
+rom/*.n64
+./train/*
+./logs/*

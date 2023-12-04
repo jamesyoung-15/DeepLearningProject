@@ -2,7 +2,7 @@
 My project that uses Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
 
 ## Instructions
-
+Project requires Linux. Tested with Arch Linux and Debian-based distros (eg. Ubuntu, PopOS).
 ### Setup
 Clone this repo:
 
@@ -29,7 +29,7 @@ chmod +x m64p_get.sh m64p_install.sh
 ./copy_files.sh
 ```
 
-Make sure to have a copy of a Mario Kart 64 ROM with file type `.n64`. Move it to the `rom` folder in this directory. 
+Make sure to have a copy of a Mario Kart 64 ROM with file type `.n64`. Move it to the `rom` folder in this directory. Also move the game states to 
 
 See [this page](./setup.md) for full details on instructions to setup.
 

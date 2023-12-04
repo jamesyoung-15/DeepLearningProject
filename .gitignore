@@ -1,4 +1,6 @@
 # Hide rom
 rom/*.n64
-./train/*
-./logs/*
+train/*
+logs/*
+__pycache__/
+.vscode

@@ -9,3 +9,5 @@ libmupen64plus.so.2
 libmupen64plus.so.2.0.0
 Glide64mk2.ini 
 InputAutoCfg.ini
+*.so
+*.ini

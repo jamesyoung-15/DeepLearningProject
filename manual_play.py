@@ -1,8 +1,20 @@
+import numpy as np
+import gymnasium as gym
+from stable_baselines3.common.evaluation import evaluate_policy
+
+from imitation.algorithms import bc
+from imitation.data import rollout
+from imitation.data.wrappers import RolloutInfoWrapper
+from imitation.policies.serialize import load_policy
+from imitation.util.util import make_vec_env
+from manual_input.agent import HumanAgent
+from manual_input.keyboard import KeyboardController
+from gymnasium.utils.play import PlayPlot, play
+
 import gym_mariokart64.mariokart64env as mk64gym
 import subprocess
 import threading
 import time
-import cv2
 
 # paths
 lib_path = "./gym_mariokart64/m64py/libmupen64plus.so.2"
@@ -12,7 +24,10 @@ tensorboard_dir = 'logs/'
 log_dir = 'tmp/'
 
 
-env = mk64gym.MarioKart64Env()
+player = HumanAgent()
+
+
+env = mk64gym.MarioKart64Env(render_mode="rgb_array")
 env.set_game_screen(useDefault=True)
 env.set_paths(lib_path, plugin_path, rom_path)
 # env = SkipFrame(env, skip=3)
@@ -24,34 +39,15 @@ thread.start()
 # sleep to prevent reading memory before emulator starts
 time.sleep(9)
 
-
-# check observation
-# env.reset()
-# # image = env.get_observation()
-# image = env.get_observation_full()
-# cv2.imshow('image', image)
-# cv2.waitKey()
-# time.sleep(5)
-
 # test env
 for episode in range(5):
     obs = env.reset()
-    subprocess.call(["xdotool", "keydown", "Shift"])
     done = False
     totalReward = 0
     while not done:
-        obs, reward, done, truncated, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(player.train())
         print("Reward: " + str(reward))
         totalReward += reward
     print(f'Total reward for episode {episode} is {totalReward}')
 
-# CHECKPOINT_DIR = './train/'
-# LOG_DIR = './logs/'
 
-# callback = mk64gym.TrainLoggingCallback(check_freq=1000, save_path=CHECKPOINT_DIR)
-
-# # create dqn model
-# model = DQN('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, buffer_size=10000, learning_starts=1000)
-
-# # train
-# model.learn(total_timesteps=5000, callback=callback)

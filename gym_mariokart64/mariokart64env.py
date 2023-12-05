@@ -30,17 +30,33 @@ import os
 import threading
 from collections import deque
 
+INPUT_WIDTH = 84
+INPUT_HEIGHT = 84
+
+USE_GRAY_SCALE = False
+RESIZE_IMAGE = False
+
+
+if USE_GRAY_SCALE:
+    INPUT_CHANNELS = 1
+else:
+    INPUT_CHANNELS = 3
 
 # own libraries
 import gym_mariokart64.m64py.m64 as m64
 
 class MarioKart64Env(gym.Env):
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     # setup environment action, observation shapes, etc.
-    def __init__(self):
+    def __init__(self, render_mode=None):
         """ Constructor """
         super().__init__()
+        self.render_mode = render_mode
         # observation space size of 640x480x3 (rbg) screen
-        self.observation_space = spaces.Box(low=0,high=255, shape=(66,200,3),dtype=np.uint8)
+        # if USE_GRAY_SCALE:
+        #     self.observation_space = spaces.Box(low=0,high=255, shape=(INPUT_CHANNELS,INPUT_HEIGHT,INPUT_WIDTH),dtype=np.uint8)
+        # else:
+        self.observation_space = spaces.Box(low=0,high=255, shape=(INPUT_HEIGHT,INPUT_WIDTH,INPUT_CHANNELS),dtype=np.uint8)
         # actions: forward-left, forward-right, forward
         self.action_space = spaces.Discrete(3)
         
@@ -130,18 +146,18 @@ class MarioKart64Env(gym.Env):
             
         }
         # print(action_map[action])
-        duration = 0.4
+        duration = 0.25
         if action==0 or action==1:
             # Simulate Shift key press
-            subprocess.call(["xdotool", "keydown", "Shift"])
-            subprocess.call(["xdotool", "keydown", action_map[action]])
+            subprocess.call(["xdotool", "keydown", "Shift", "keydown", action_map[action]])
+            # subprocess.call(["xdotool", "keydown", action_map[action]])
             time.sleep(duration)
             # release
-            subprocess.call(["xdotool", "keyup", action_map[action]])
-            subprocess.call(["xdotool", "keyup", "Shift"])
+            subprocess.call(["xdotool", "keyup", action_map[action], "keyup", "Shift"])
+            # subprocess.call(["xdotool", "keyup", "Shift"])
         else:
             subprocess.call(["xdotool", "keydown", action_map[action]])
-            time.sleep(duration+0.1)
+            time.sleep(duration)
             subprocess.call(["xdotool", "keyup", action_map[action]])
 
 
@@ -161,33 +177,30 @@ class MarioKart64Env(gym.Env):
         if not done:
             # big reward for new lap
             if new_lap>self.highest_lap and new_lap!=1:
-                reward+=200
-            # reward for making new progress and going fast
-            if new_progress>self.highest_progress and self.speed>self.speed_high_threshold:
-                factor = min(int(5*(progress_diff/self.good_progress_threshold)),20)
-                # print("good: " + str(factor))
+                reward+=100
+            # reward for making new progress, reward based on speed
+            if new_progress>self.highest_progress:
+                factor = min(int(5*(self.speed/self.speed_high_threshold)),5)
+                # print("progress reward: " + str(factor))
                 reward+=factor
-            # reward for making progress and moderate speed
-            elif new_progress>self.highest_progress and self.speed>self.speed_threshold:
-                factor = min(int((progress_diff/self.good_progress_threshold)),5)
-                # print("meh: " + str(factor))
-                reward += factor
             # punish for going wrong direction
             elif new_progress<self.progress:
-                reward-=10
+                factor = min(int(5*(self.speed/self.speed_high_threshold)),5)
+                # print("progress reward: " + str(factor))
+                reward-=factor
             # small reward kart for going fast
             if self.speed>self.speed_high_threshold:
-                reward+=1
+                reward+=0.1
             # punish for going slow
             elif self.speed<self.speed_low_threshold:
-                reward-=1
+                reward-=0.1
         # reward kart for finishing
         else:
-            reward+=100000
+            reward+=10000
 
         # stop early if going backward too much
         if new_lap<self.current_lap:
-            reward-=500
+            reward-=50
             # print("Stopped! Wrong way!")
             done = True
         
@@ -195,11 +208,11 @@ class MarioKart64Env(gym.Env):
         self.progress_queue.append(new_progress)
         self.speed_queue.append(self.speed)
         if sum(self.speed_queue)/len(self.speed_queue) < self.speed_low_threshold:
-            reward-=200
+            reward-=10
             # print("Stopped! Too slow!")
             done = True
         if max(self.progress_queue) < self.highest_progress:
-            reward-=200
+            reward-=20
             # print("Stopped! Not enough progress!")
             done = True
 
@@ -216,16 +229,17 @@ class MarioKart64Env(gym.Env):
         # limit steps
         truncated = False
         return new_obs, reward, done, truncated, info
+        # return new_obs, reward, done, info
         
     # visualize game
-    # def render(self):
-    #     """ Visualize game, not necessary """
-    #     cv2.imshow('Game', np.array(self.capture.grab(self.game_screen))[:,:,:3])
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         self.close()
+    def render(self):
+        """ Visualize game, not necessary """
+        cv2.imshow('Game', np.array(self.capture.grab(self.game_screen))[:,:,:3])
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.close()
 
     # restart game
-    def reset(self, seed=None):
+    def reset(self, seed=None, options=None):
         """ Restart the game """
         time.sleep(1)
         self.reset_variables()
@@ -255,7 +269,10 @@ class MarioKart64Env(gym.Env):
         subprocess.call(["xdotool", "keydown", "Shift"])
         time.sleep(1.5)
         subprocess.call(["xdotool", "keyup", "Shift"])
-        info = {}
+        info = {
+            "progress": self.progress,
+            "speed": self.speed
+        }
         return self.get_observation(), info
 
     def reset_variables(self):
@@ -287,9 +304,20 @@ class MarioKart64Env(gym.Env):
         """ Grab screen with mss, return resized np image array """
         # capture screen
         image_array = np.array(self.capture.grab(self.game_screen))[:,:,:3]
-        # resize image
-        im = resize(image_array, (66, 200, 3))
-        image_array = im.reshape((66, 200, 3))
+        # image_array = np.array(self.capture.grab(self.game_screen), dtype=np.uint8)
+        # image_array = np.flip(image_array[:,:,:3], 2)
+        if RESIZE_IMAGE:
+            if USE_GRAY_SCALE:
+                image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
+                # resize image
+                im = resize(image_array, (INPUT_CHANNELS,INPUT_HEIGHT, INPUT_WIDTH))
+                image_array = im.reshape((INPUT_CHANNELS,INPUT_HEIGHT, INPUT_WIDTH))
+
+            else:
+                # resize image
+                im = resize(image_array, (INPUT_HEIGHT, INPUT_WIDTH, INPUT_CHANNELS))
+                image_array = im.reshape((INPUT_HEIGHT, INPUT_WIDTH, INPUT_CHANNELS))
+
         return image_array
 
     def get_observation_full(self):
@@ -321,10 +349,10 @@ class MarioKart64Env(gym.Env):
             return True
         return False
 
-    # # close rendered screens
-    # def close(self):
-    #     """ Close cv2 windows if needed """
-    #     cv2.destroyAllWindows()
+    # close rendered screens
+    def close(self):
+        """ Close cv2 windows if needed """
+        cv2.destroyAllWindows()
 
 
 class TrainLoggingCallback(BaseCallback):

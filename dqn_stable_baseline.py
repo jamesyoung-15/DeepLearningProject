@@ -11,6 +11,7 @@ import cv2
 
 # my libraries
 import gym_mariokart64.mariokart64env as mk64gym
+from torch_network.wrappers import SkipFrame 
 
 
 def main(existing_model=None):
@@ -23,15 +24,16 @@ def main(existing_model=None):
 
 
     env = mk64gym.MarioKart64Env()
-    env.set_game_screen(useDefault=False,top=350,left=640)
+    env.set_game_screen(useDefault=True)
     env.set_paths(lib_path, plugin_path, rom_path)
+
     # create thread for concurrency
     thread = threading.Thread(target=env.start_game)
     thread.start()
     # sleep to prevent reading memory before emulator starts
     time.sleep(9)
 
-    
+
     # check observation
     # env.reset()
     # # image = env.get_observation()
@@ -41,7 +43,7 @@ def main(existing_model=None):
     # time.sleep(5)
 
     # test env
-    # for episode in range(2):
+    # for episode in range(5):
     #     obs = env.reset()
     #     subprocess.call(["xdotool", "keydown", "Shift"])
     #     done = False
@@ -57,23 +59,26 @@ def main(existing_model=None):
     os.makedirs(tensorboard_dir, exist_ok=True)
     env = Monitor(env, log_dir)
     callback = mk64gym.SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir=log_dir)
+    # callback = mk64gym.TrainLoggingCallback(check_freq=1000, save_path=log_dir)
 
     # create dqn model
     if existing_model:
         print("Using existing model")
-        model = DQN.load(existing_model,env, tensorboard_log=tensorboard_dir)
+        model = DQN.load("./tmp/best_model_46000.zip",env, tensorboard_log=tensorboard_dir)
     else:
         model = DQN('CnnPolicy', 
                 env, 
-                # learning_rate=1e-4,
-                # batch_size= 192, # https://arxiv.org/pdf/1803.02811.pdf
+                learning_rate=1e-2,
+                batch_size= 192, # https://arxiv.org/pdf/1803.02811.pdf
                 tensorboard_log=tensorboard_dir, 
                 verbose=1, 
-                buffer_size=100000, 
-                learning_starts=2000)
+                buffer_size=200000, 
+                learning_starts=5000)
 
-    # train model
+    # # train model
     model.learn(total_timesteps=100000, callback=callback)
 
 if __name__ == '__main__':
-    main()
+    # model = True
+    model=None
+    main(model)

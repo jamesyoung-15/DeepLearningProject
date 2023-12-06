@@ -68,12 +68,12 @@ def main(existing_model=None):
     else:
         model = DQN('CnnPolicy', 
                 env, 
-                learning_rate=1e-2,
+                learning_rate=2e-4,
                 batch_size= 192, # https://arxiv.org/pdf/1803.02811.pdf
                 tensorboard_log=tensorboard_dir, 
-                verbose=1, 
-                buffer_size=200000, 
-                learning_starts=5000)
+                verbose=0, 
+                buffer_size=250000, 
+                learning_starts=1000)
 
     # # train model
     model.learn(total_timesteps=100000, callback=callback)

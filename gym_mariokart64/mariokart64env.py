@@ -33,8 +33,8 @@ from collections import deque
 INPUT_WIDTH = 84
 INPUT_HEIGHT = 84
 
-USE_GRAY_SCALE = False
-RESIZE_IMAGE = False
+USE_GRAY_SCALE = True
+RESIZE_IMAGE = True
 
 
 if USE_GRAY_SCALE:
@@ -56,7 +56,10 @@ class MarioKart64Env(gym.Env):
         # if USE_GRAY_SCALE:
         #     self.observation_space = spaces.Box(low=0,high=255, shape=(INPUT_CHANNELS,INPUT_HEIGHT,INPUT_WIDTH),dtype=np.uint8)
         # else:
-        self.observation_space = spaces.Box(low=0,high=255, shape=(INPUT_HEIGHT,INPUT_WIDTH,INPUT_CHANNELS),dtype=np.uint8)
+        if RESIZE_IMAGE:
+            self.observation_space = spaces.Box(low=0,high=255, shape=(INPUT_HEIGHT,INPUT_WIDTH,INPUT_CHANNELS),dtype=np.uint8)
+        else:
+            self.observation_space = spaces.Box(low=0,high=255, shape=(480,640,3),dtype=np.uint8)
         # actions: forward-left, forward-right, forward
         self.action_space = spaces.Discrete(3)
         
@@ -89,8 +92,8 @@ class MarioKart64Env(gym.Env):
         self.good_progress_threshold = 440000
         self.highest_lap = 0 # prevent from going forward and backward to count as lap
         self.highest_progress = 0
-        self.speed_queue_size = 8
-        self.progress_queue_size = 10
+        self.speed_queue_size = 25
+        self.progress_queue_size = 15
         self.speed_queue = deque(maxlen= self.speed_queue_size) # holds n frames speed
         self.progress_queue = deque(maxlen = self.progress_queue_size) # holds last 15 progress value
         # populate queue
@@ -146,18 +149,18 @@ class MarioKart64Env(gym.Env):
             
         }
         # print(action_map[action])
-        duration = 0.25
+        # duration = 0.25
         if action==0 or action==1:
             # Simulate Shift key press
             subprocess.call(["xdotool", "keydown", "Shift", "keydown", action_map[action]])
             # subprocess.call(["xdotool", "keydown", action_map[action]])
-            time.sleep(duration)
+            # time.sleep(duration)
             # release
             subprocess.call(["xdotool", "keyup", action_map[action], "keyup", "Shift"])
             # subprocess.call(["xdotool", "keyup", "Shift"])
         else:
             subprocess.call(["xdotool", "keydown", action_map[action]])
-            time.sleep(duration)
+            # time.sleep(duration)
             subprocess.call(["xdotool", "keyup", action_map[action]])
 
 
@@ -310,8 +313,8 @@ class MarioKart64Env(gym.Env):
             if USE_GRAY_SCALE:
                 image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
                 # resize image
-                im = resize(image_array, (INPUT_CHANNELS,INPUT_HEIGHT, INPUT_WIDTH))
-                image_array = im.reshape((INPUT_CHANNELS,INPUT_HEIGHT, INPUT_WIDTH))
+                im = resize(image_array, (INPUT_HEIGHT, INPUT_WIDTH, INPUT_CHANNELS))
+                image_array = im.reshape((INPUT_HEIGHT, INPUT_WIDTH, INPUT_CHANNELS))
 
             else:
                 # resize image

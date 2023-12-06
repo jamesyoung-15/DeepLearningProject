@@ -1,7 +1,9 @@
 # DeepRL MarioKart64
-My project that attempts to use Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). Unsuccessful before submission :(.
+Warning: Useless repo failed project. 
 
-The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
+My project that fails to use Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
+
+Unfortunately agent is unable to even complete a single lap after 12 hours of training :(. May pickup again if I feel like it so will keep the repo up.
 
 ## Instructions
 Project requires Linux. Tested with Arch Linux and Debian-based distros (eg. Ubuntu, PopOS).
@@ -36,9 +38,10 @@ Make sure to have a copy of a Mario Kart 64 ROM with file type `.n64`. Move it t
 See [this page](./setup.md) for full details on instructions to setup.
 
 ### Usage
-Use train.py.
+For my own model, use `custom_train.py`. For using Stable Baselines 3, see `dqn_stable_baselines.py`.
+
 ```bash
-python3 train.py
+python3 custom_train.py
 ```
 
 ## More About the Project

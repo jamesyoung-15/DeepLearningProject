@@ -1,9 +1,9 @@
 # DeepRL MarioKart64
-Warning: Useless repo failed project. 
+Warning: Project incomplete and currently model cannot complete track. Will complete soon.
 
-My project that fails to use Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
+On-going project that aims to use Deep Reinforced Learning to play MarioKart64. Specfically, the project uses Deep Q-Learning as described by [this paper](https://arxiv.org/abs/1312.5602). The project uses debugger build of [Mupen64Plus emulator](https://mupen64plus.org/docs/) and wraps it with Farama's [Gymnasium](https://gymnasium.farama.org/) library to simplify training.
 
-Unfortunately agent is unable to even complete a single lap after 12 hours of training :(. May pickup again if I feel like it so will keep the repo up.
+Originally for course project but failed to complete it before deadline. Will pickup again soon.
 
 ## Instructions
 Project requires Linux. Tested with Arch Linux and Debian-based distros (eg. Ubuntu, PopOS).

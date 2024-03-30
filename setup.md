@@ -22,8 +22,11 @@ Make sure you at least have Python3, Pip, and Git.
 git clone https://github.com/jamesyoung-15/DeepQLKart64
 cd DeepQLKart64
 # install requirements
+pip install tensorrt --extra-index-url https://pypi.nvidia.com
 pip install -r requirements.txt
 ```
+
+Update: Use `pip install tensorrt --extra-index-url https://pypi.nvidia.com` (see [issue](https://github.com/NVIDIA/TensorRT/pull/3080)) instead of `pip install tensorrt-libs`.
 
 For Mupen64Plus, there are many requirements. See their documentation below. Also ensure you have `binutils-dev` as I ran into issue on PopOS where it said no file "dis-asm.h" without it.
 
